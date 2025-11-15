@@ -24,6 +24,63 @@ cp terraform-style.example.yaml terraform-style.yaml
 # Then configure in your MCP client (see "Running the Server" section)
 ```
 
+## Why tf-dialect?
+
+### The Problem
+
+AI coding assistants generate generic Terraform code that violates your org's standards. Your existing tools (tflint, Sentinel, module registries) are **reactive**—they catch violations after code is written. Developers waste cycles fixing preventable issues.
+
+### The Solution
+
+tf-dialect exposes your Terraform standards to AI agents via MCP before code generation. AI learns your naming conventions, required tags, approved modules, and security defaults, then generates compliant code on first try.
+
+### Before/After
+
+**Without tf-dialect:**
+```hcl
+# AI generates generic code
+resource "aws_s3_bucket" "logs" {
+  bucket = "my-logs-bucket"
+}
+# ❌ Wrong naming, missing tags, no encryption, not using approved module
+# → 3 commits to fix tflint/Sentinel violations
+```
+
+**With tf-dialect:**
+```hcl
+# AI calls get_style_guide() + list_examples() first
+module "logs_bucket" {
+  source = "../modules/s3-bucket"
+  
+  name = "acme-prod-logs"
+  kms_key_id = data.aws_kms_key.standard.arn
+  
+  tags = {
+    CostCenter  = "engineering"
+    Team        = "platform"
+    Environment = "prod"
+  }
+}
+# ✅ Passes all checks on first commit
+```
+
+### Positioning
+
+| Tool | Phase | Purpose |
+|------|-------|---------|
+| **tf-dialect** | Pre-generation | Teach AI your standards |
+| Module Registry | Reference | Provide reusable modules |
+| tflint/checkov | Post-generation | Static analysis |
+| Sentinel/OPA | Runtime | Policy enforcement |
+
+tf-dialect is **complementary**—it makes AI agents aware of your module registry and helps generate code that passes your existing validation tools.
+
+### Target Users
+
+- **Platform teams:** Standardizing AI-generated IaC across your org
+- **Developers:** Using Claude/Copilot/ChatGPT for Terraform
+- **Organizations:** With existing Terraform standards that AI doesn't know about
+
 ## Features
 
 - 📚 **Style Guide Management**: Define your Terraform conventions in a single YAML file
