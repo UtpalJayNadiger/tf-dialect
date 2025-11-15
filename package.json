@@ -1,0 +1,25 @@
+{
+  "name": "tf-dialect",
+  "version": "0.1.0",
+  "description": "MCP server that exposes your organization's Terraform style guide to AI coding agents",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "mcp": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": ["mcp", "terraform", "iac", "style-guide"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}

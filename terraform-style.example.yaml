@@ -1,0 +1,82 @@
+modules:
+  pattern: "root + shared-modules"
+  shared_module_path: "modules/"
+  prefer_shared_modules: true
+
+naming:
+  resource_format: "<project>-<env>-<component>-<extra?>"
+  variable_case: "snake_case"
+  output_case: "snake_case"
+
+tagging:
+  required_tags:
+    - "environment"
+    - "owner"
+    - "cost_center"
+  defaults:
+    environment: "${var.environment}"
+    owner: "infra-team"
+
+providers:
+  allowed:
+    - name: "aws"
+      version_constraint: "~> 5.0"
+  forbidden_patterns:
+    - description: "No 0.0.0.0/0 in security groups"
+      match: '0\.0\.0\.0/0'
+    - description: "No hardcoded credentials"
+      match: 'password\s*=\s*"[^$]'
+
+security_defaults:
+  s3_bucket:
+    block_public_acls: true
+    block_public_policy: true
+    versioning: true
+    encryption: "aws:kms"
+  rds:
+    storage_encrypted: true
+    backup_retention_period: 7
+
+examples:
+  s3_private_bucket: |
+    module "logs_bucket" {
+      source = "../modules/s3-bucket"
+      name   = "${local.project}-${var.environment}-logs"
+      
+      versioning_enabled = true
+      encryption_type    = "aws:kms"
+      
+      tags = local.default_tags
+    }
+
+  rds_postgres: |
+    module "db" {
+      source = "../modules/rds-postgres"
+      
+      identifier = "${local.project}-${var.environment}-db"
+      engine_version = "15.4"
+      
+      instance_class = "db.t3.medium"
+      allocated_storage = 100
+      
+      storage_encrypted = true
+      backup_retention_period = 7
+      
+      tags = local.default_tags
+    }
+
+  ecs_service: |
+    module "api_service" {
+      source = "../modules/ecs-service"
+      
+      name    = "${local.project}-${var.environment}-api"
+      cluster = aws_ecs_cluster.main.id
+      
+      container_image = "123456789.dkr.ecr.us-east-1.amazonaws.com/api:latest"
+      container_port  = 8080
+      
+      cpu    = 256
+      memory = 512
+      
+      tags = local.default_tags
+    }
