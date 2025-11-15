@@ -8,7 +8,7 @@ Configure once, use with any MCP-capable coding agent (Claude Desktop, Cline, et
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/tf-dialect.git
+git clone https://github.com/utpaljaynadiger/tf-dialect.git
 cd tf-dialect
 
 # Install dependencies
